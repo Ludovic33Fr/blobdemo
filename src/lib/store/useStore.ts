@@ -24,9 +24,9 @@ setParam: <K extends keyof SimParams>(k:K, v:SimParams[K])=>void
 snapshot: { width: 800, height: 600, dpr: 1, nodes: [], edges: [], cost: 0, energy: 0 },
 params: {
 dt: 0.06, K: 4, epsNoise: 0.05,
-wFood: 1.0, wPoison: 1.0, wBlob: 0.8, wSlime: 0.15, wCost: 0.05,
-thetaGrow: 0.1, thetaShrink: -0.1, pruneEps: 0.01,
-alpha: 0.5, beta: 0.02, Dmax: 3.0, Mmax: 1200,
+wFood: 1.5, wPoison: 1.0, wBlob: 0.8, wSlime: 0.15, wCost: 0.05,
+thetaGrow: 0.15, thetaShrink: -0.1, pruneEps: 0.01,
+alpha: 0.3, beta: 0.02, Dmax: 2.0, Mmax: 800,
 slimeDeposit: 0.04, slimeDecay: 0.01,
 },
 scene: {

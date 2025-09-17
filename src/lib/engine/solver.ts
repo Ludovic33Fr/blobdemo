@@ -5,7 +5,24 @@ import { nutrientAt, riskAt, blobAt } from './fields'
 
 export function solvePotentials(state:SimState, p:SimParams){
 // Jacobi-like relaxation using nutrient-risk as external drive
-// Seulement calculer les potentiels dans les zones connectées au blob
+// Créer un gradient d'attraction vers la nourriture
+const foodNodes = state.nodes.filter(n => n.type === 'food')
+const blobNodes = state.nodes.filter(n => n.type === 'blob')
+
+// Calculer le gradient d'attraction vers la nourriture
+for (let y=0; y<GRID_H; y++){
+  for (let x=0; x<GRID_W; x++){
+    let maxFoodAttraction = 0
+    for (const foodNode of foodNodes) {
+      const distToFood = Math.sqrt((x - foodNode.gx)**2 + (y - foodNode.gy)**2)
+      const attraction = foodNode.strength * Math.exp(-distToFood/6) // Gradient plus concentré
+      maxFoodAttraction = Math.max(maxFoodAttraction, attraction)
+    }
+    state.P[idx(x,y)] = maxFoodAttraction
+  }
+}
+
+// Propagation du gradient depuis les nœuds blob
 for (let iter=0; iter<3; iter++){
 for (let y=0;y<GRID_H;y++){
 for (let x=0;x<GRID_W;x++){
@@ -18,19 +35,17 @@ const hasConnection = state.D_h[hIdx(x,y)] > 0.01 ||
                      (y > 0 && state.D_v[vIdx(x,y-1)] > 0.01)
 
 // Ou être proche d'un nœud blob
-const blobNodes = state.nodes.filter(n => n.type === 'blob')
 let nearBlob = false
 for (const blobNode of blobNodes) {
   const dist = Math.sqrt((x - blobNode.gx)**2 + (y - blobNode.gy)**2)
-  if (dist <= 3) {
+  if (dist <= 5) {
     nearBlob = true
     break
   }
 }
 
 if (!hasConnection && !nearBlob) {
-  state.P[i] = 0 // Pas de potentiel si pas connecté
-  continue
+  continue // Garder le gradient d'attraction
 }
 
 const base = nutrientAt(state,x,y) - riskAt(state,x,y) + p.wBlob*blobAt(state,x,y)
@@ -40,7 +55,7 @@ if (x<GRID_W-1){ sum += state.P[idx(x+1,y)]; cnt++ }
 if (y>0) { sum += state.P[idx(x,y-1)]; cnt++ }
 if (y<GRID_H-1){ sum += state.P[idx(x,y+1)]; cnt++ }
 const avgN = cnt? sum/cnt : 0
-state.P[i] = 0.85*state.P[i] + 0.15*(avgN + base)
+state.P[i] = 0.7*state.P[i] + 0.3*(avgN + base) // Mélanger gradient et potentiel
 }
 }
 }

@@ -11,6 +11,41 @@ const foodNodes = state.nodes.filter(n => n.type === 'food')
 
 if (blobNodes.length === 0) return // Pas de nœuds blob, pas de croissance
 
+// Initialiser les connexions depuis les nœuds blob s'ils n'en ont pas
+for (const blobNode of blobNodes) {
+  const x = blobNode.gx
+  const y = blobNode.gy
+  
+  // Vérifier si le nœud blob a déjà des connexions
+  const hasConnections = (x < GRID_W-1 && state.D_h[hIdx(x,y)] > 0.01) ||
+                        (x > 0 && state.D_h[hIdx(x-1,y)] > 0.01) ||
+                        (y < GRID_H-1 && state.D_v[vIdx(x,y)] > 0.01) ||
+                        (y > 0 && state.D_v[vIdx(x,y-1)] > 0.01)
+  
+  // Si pas de connexions, initialiser avec une petite valeur
+  if (!hasConnections) {
+    if (x < GRID_W-1) state.D_h[hIdx(x,y)] = 0.1
+    if (x > 0) state.D_h[hIdx(x-1,y)] = 0.1
+    if (y < GRID_H-1) state.D_v[vIdx(x,y)] = 0.1
+    if (y > 0) state.D_v[vIdx(x,y-1)] = 0.1
+  }
+}
+
+// Créer un gradient d'attraction vers la nourriture
+// Pour chaque cellule, calculer la force d'attraction vers la nourriture la plus proche
+for (let y=0; y<GRID_H; y++){
+  for (let x=0; x<GRID_W; x++){
+    let maxFoodAttraction = 0
+    for (const foodNode of foodNodes) {
+      const distToFood = Math.sqrt((x - foodNode.gx)**2 + (y - foodNode.gy)**2)
+      const attraction = foodNode.strength * Math.exp(-distToFood/8) // Gradient d'attraction
+      maxFoodAttraction = Math.max(maxFoodAttraction, attraction)
+    }
+    // Stocker l'attraction dans le potentiel pour guider la croissance
+    state.P[idx(x,y)] = maxFoodAttraction
+  }
+}
+
 // Pour chaque nœud blob, chercher le chemin vers les nœuds nourriture
 for (const blobNode of blobNodes) {
   const startX = blobNode.gx
@@ -28,8 +63,8 @@ for (const blobNode of blobNodes) {
                                    state.D_v[vIdx(x,y)] > 0.01 || 
                                    (y > 0 && state.D_v[vIdx(x,y-1)] > 0.01)
       
-      // Ou être proche d'un nœud blob
-      const nearBlob = distToBlob <= 3
+      // Ou être proche d'un nœud blob (zone de croissance initiale)
+      const nearBlob = distToBlob <= 4 // Zone plus restreinte
       
       if (!nearBlob && !hasExistingConnection) continue
       
@@ -48,22 +83,31 @@ for (const blobNode of blobNodes) {
         if (!d.valid) continue
         const nx = x + d.dx, ny = y + d.dy
         
-        // Bonus pour se diriger vers la nourriture
-        let foodBonus = 0
-        for (const foodNode of foodNodes) {
-          const distToFood = Math.sqrt((nx - foodNode.gx)**2 + (ny - foodNode.gy)**2)
-          foodBonus += foodNode.strength * Math.exp(-distToFood/5) // Attraction vers la nourriture
-        }
+        // Utiliser le gradient d'attraction vers la nourriture
+        const foodGradient = state.P[idx(nx,ny)] // Potentiel d'attraction vers la nourriture
         
-        const score = base + p.wFood*nutrientAt(state,nx,ny) - p.wPoison*riskAt(state,nx,ny) + p.wBlob*blobAt(state,nx,ny) + foodBonus - p.wCost
+        // Bonus pour se diriger vers la nourriture (gradient) - plus modéré
+        const gradientBonus = foodGradient * 1.2 // Multiplier le gradient de façon plus douce
+        
+        const score = base + p.wFood*nutrientAt(state,nx,ny) - p.wPoison*riskAt(state,nx,ny) + p.wBlob*blobAt(state,nx,ny) + gradientBonus - p.wCost
         + (Math.random()-0.5)*p.epsNoise
         
         if (score > best){ best = score; bestDir = d }
       }
       
       if (best > p.thetaGrow && bestDir){
-        if (bestDir.kind==='h') state.D_h[bestDir.key] = Math.min(p.Dmax, state.D_h[bestDir.key] + p.alpha)
-        else state.D_v[bestDir.key] = Math.min(p.Dmax, state.D_v[bestDir.key] + p.alpha)
+        // Vérifier que la direction suit le gradient (attraction vers la nourriture)
+        const targetGradient = state.P[idx(x + bestDir.dx, y + bestDir.dy)]
+        const currentGradient = state.P[idx(x, y)]
+        
+        // Ne grandir que si on se rapproche de la nourriture ou si on est déjà proche
+        const isMovingTowardFood = targetGradient > currentGradient * 0.8
+        const isNearFood = targetGradient > 0.3
+        
+        if (isMovingTowardFood || isNearFood) {
+          if (bestDir.kind==='h') state.D_h[bestDir.key] = Math.min(p.Dmax, state.D_h[bestDir.key] + p.alpha)
+          else state.D_v[bestDir.key] = Math.min(p.Dmax, state.D_v[bestDir.key] + p.alpha)
+        }
       }
       
       if (best < p.thetaShrink){
