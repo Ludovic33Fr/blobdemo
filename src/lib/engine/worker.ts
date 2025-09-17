@@ -53,7 +53,7 @@ edges.push({ id:`v-${x}-${y}`, ax:a.x, ay:a.y, bx:b.x, by:b.y, D, Q })
 }
 }
 }
-const nodes = state.nodes.map(n=>{ const p = gridToPx(n.gx,n.gy); return { x:p.x, y:p.y, type:n.type } })
+const nodes = state.nodes.map(n=>{ const p = gridToPx(n.gx,n.gy); return { x:p.x, y:p.y, type:n.type, gx:n.gx, gy:n.gy } })
 return { width: state.width, height: state.height, dpr: state.dpr, nodes, edges, cost, energy }
 }
 
@@ -106,11 +106,16 @@ function tick(){
     }
     
     
-    function handleAction(action:any){
-    if (action.kind==='addNode'){
-    const type: NodeType = action.type
-    const gx = Math.floor(Math.random()*GRID_W)
-    const gy = Math.floor(Math.random()*GRID_H)
-    state.nodes.push({ id: crypto.randomUUID(), gx, gy, type, strength: 1, radius: 4 })
-    }
+function handleAction(action:any){
+if (action.kind==='addNode'){
+const type: NodeType = action.type
+const gx = Math.floor(Math.random()*GRID_W)
+const gy = Math.floor(Math.random()*GRID_H)
+state.nodes.push({ id: crypto.randomUUID(), gx, gy, type, strength: 1, radius: 4 })
+} else if (action.kind==='removeNode'){
+const gx = action.gx
+const gy = action.gy
+// Supprimer le nœud à la position donnée
+state.nodes = state.nodes.filter(n => !(n.gx === gx && n.gy === gy))
+}
 }

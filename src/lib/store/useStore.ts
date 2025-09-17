@@ -10,7 +10,7 @@ let worker: Worker | null = null
 export const useStore = create<{
 snapshot: FrameSnapshot
 params: SimParams
-scene: { addNode: (type: NodeType)=>void }
+scene: { addNode: (type: NodeType)=>void; removeNode: (gx: number, gy: number)=>void }
 engine: {
 running: boolean
 play: ()=>void
@@ -30,7 +30,8 @@ alpha: 0.3, beta: 0.02, Dmax: 2.0, Mmax: 800,
 slimeDeposit: 0.04, slimeDecay: 0.01,
 },
 scene: {
-addNode: (type)=>{ worker?.postMessage({ type:'action', action:{ kind:'addNode', type } }) }
+addNode: (type)=>{ worker?.postMessage({ type:'action', action:{ kind:'addNode', type } }) },
+removeNode: (gx, gy)=>{ worker?.postMessage({ type:'action', action:{ kind:'removeNode', gx, gy } }) }
 },
 engine: {
 running: false,

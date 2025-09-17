@@ -39,6 +39,15 @@ return (
 </CardContent>
 </Card>
 
+<Card>
+<CardTitle>Interaction</CardTitle>
+<CardContent>
+<p className="text-xs text-gray-400">
+Cliquez sur un nœud pour le supprimer
+</p>
+</CardContent>
+</Card>
+
 
 <Card>
 <CardTitle>Paramètres</CardTitle>

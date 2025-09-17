@@ -95,5 +95,15 @@ if (n.type === 'food') {
 ctx.fill()
 ctx.lineWidth = 2
 ctx.stroke()
+
+// Indicateur de double-clic (petit X)
+ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'
+ctx.lineWidth = 1.5
+ctx.beginPath()
+ctx.moveTo(n.x - 3, n.y - 3)
+ctx.lineTo(n.x + 3, n.y + 3)
+ctx.moveTo(n.x + 3, n.y - 3)
+ctx.lineTo(n.x - 3, n.y + 3)
+ctx.stroke()
 }
 }
