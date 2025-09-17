@@ -17,9 +17,12 @@ let params: SimParams
 
 
 function gridToPx(x:number,y:number){
-const cellW = state.width/GRID_W
-const cellH = state.height/GRID_H
-return { x: (x+0.5)*cellW, y: (y+0.5)*cellH }
+const gridSize = Math.min(state.width, state.height) * 0.8
+const cellW = gridSize/GRID_W
+const cellH = gridSize/GRID_H
+const offsetX = (state.width - gridSize) / 2
+const offsetY = (state.height - gridSize) / 2
+return { x: offsetX + (x+0.5)*cellW, y: offsetY + (y+0.5)*cellH }
 }
 
 
