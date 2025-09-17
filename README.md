@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Blob Demo - Simulation de Croissance de Blob
 
-## Getting Started
+Une simulation interactive de croissance de blob utilisant Next.js, TypeScript et Canvas.
 
-First, run the development server:
+## 🎯 Fonctionnalités
 
+- **Simulation de blob** : Le blob se développe de manière organique sur une grille
+- **3 types de nœuds** :
+  - 🔵 **Blob** : Point de départ et d'ancrage pour le développement
+  - 🍎 **Nourriture** : Attire le blob (force positive)
+  - ☠️ **Poison** : Répulse le blob (force négative)
+- **Interface interactive** : Contrôles en temps réel pour ajouter des nœuds et ajuster les paramètres
+- **Rendu en temps réel** : Visualisation des tubes de blob et des flux
+
+## 🚀 Installation
+
+### Prérequis
+- Node.js 18.18.0 ou plus récent
+- npm ou yarn
+
+### Installation des dépendances
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Démarrage en développement
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🎮 Utilisation
 
-## Learn More
+1. **Ajouter des nœuds** :
+   - Cliquez sur le bouton 🔵 pour ajouter un nœud blob
+   - Cliquez sur le bouton 🍎 pour ajouter de la nourriture
+   - Cliquez sur le bouton ☠️ pour ajouter du poison
 
-To learn more about Next.js, take a look at the following resources:
+2. **Contrôles de simulation** :
+   - ▶️ **Play/Pause** : Démarrer/arrêter la simulation
+   - 🔄 **Reset** : Réinitialiser la simulation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Paramètres ajustables** :
+   - **dt** : Vitesse de simulation
+   - **Exploration (bruit)** : Niveau d'exploration aléatoire
+   - **Poids Blob** : Influence des nœuds blob sur la croissance
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🧠 Algorithme
 
-## Deploy on Vercel
+La simulation utilise :
+- **Potentiels** : Calcul des champs de potentiel basés sur les nœuds
+- **Conductances** : Gestion des connexions entre cellules de la grille
+- **Flux** : Calcul des flux de matière à travers les connexions
+- **Croissance/Décroissance** : Règles adaptatives basées sur les potentiels locaux
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🛠️ Technologies
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Next.js 15** : Framework React
+- **TypeScript** : Typage statique
+- **Tailwind CSS** : Styling
+- **Zustand** : Gestion d'état
+- **Canvas API** : Rendu graphique
+- **Web Workers** : Calculs en arrière-plan
+
+## 📁 Structure du projet
+
+```
+src/
+├── app/                 # Pages Next.js
+├── components/          # Composants React
+│   ├── ui/             # Composants UI réutilisables
+│   ├── CanvasViewport.tsx
+│   ├── ControlsPanel.tsx
+│   └── HUDStats.tsx
+├── lib/
+│   ├── engine/         # Moteur de simulation
+│   │   ├── model.ts    # Types et interfaces
+│   │   ├── fields.ts   # Calculs de champs
+│   │   ├── rules.ts    # Règles de croissance
+│   │   ├── solver.ts   # Résolution des potentiels
+│   │   └── worker.ts   # Web Worker
+│   ├── store/          # Gestion d'état Zustand
+│   └── utils/          # Utilitaires
+```
+
+## 🎨 Personnalisation
+
+Vous pouvez facilement :
+- Modifier les couleurs dans `src/lib/utils/canvas.ts`
+- Ajuster les paramètres par défaut dans `src/lib/store/useStore.ts`
+- Ajouter de nouveaux types de nœuds dans `src/lib/engine/model.ts`
+
+## 📝 Licence
+
+Ce projet est sous licence MIT.
